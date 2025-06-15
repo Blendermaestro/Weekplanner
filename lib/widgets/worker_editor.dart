@@ -53,125 +53,110 @@ class _WorkerEditorDialogState extends State<WorkerEditorDialog> {
     return Dialog(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        height: 400,
+        height: 500,
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.worker == null ? 'Add Worker' : 'Edit Worker',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.worker == null ? 'Add Worker' : 'Edit Worker',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Name text input
-            Row(
-              children: [
-                const SizedBox(width: 80, child: Text('Name:')),
-                Expanded(
-                  child: TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter worker name',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Profession dropdown
-            Row(
-              children: [
-                const SizedBox(width: 80, child: Text('Role:')),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: selectedProfession,
-                    isExpanded: true,
-                    items: widget.availableProfessions.map((profession) {
-                      return DropdownMenuItem(
-                        value: profession,
-                        child: Text(profession),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          selectedProfession = value;
-                          // Reset master class if profession doesn't support current shift
-                          if (selectedMasterClassId != null) {
-                            final masterClass = widget.masterClasses.firstWhere(
-                              (mc) => mc.id == selectedMasterClassId,
-                              orElse: () => MasterClass(id: '', displayName: '', shiftType: ShiftType.off),
-                            );
-                            final profCapacity = Constants.getProfessionCapacity(value, widget.professionCapacities);
-                            if (masterClass.shiftType == ShiftType.night && 
-                                profCapacity != null && !profCapacity.availableAtNight) {
-                              selectedMasterClassId = null;
-                              selectedHousingId = null;
-                            }
-                          }
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Master class dropdown
-            Row(
-              children: [
-                const SizedBox(width: 80, child: Text('Class:')),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: selectedMasterClassId,
-                    isExpanded: true,
-                    hint: const Text('Select master class'),
-                    items: _getAvailableMasterClasses().map((masterClass) {
-                      return DropdownMenuItem(
-                        value: masterClass.id,
-                        child: Text('${masterClass.displayName} (${masterClass.shiftType.displayName})'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedMasterClassId = value;
-                        // Reset housing selection when master class changes
-                        selectedHousingId = null;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Housing dropdown (only when master class is selected)
-            if (selectedMasterClassId != null) ...[
+              const SizedBox(height: 16),
+              
+              // Name text input
               Row(
                 children: [
-                  const SizedBox(width: 80, child: Text('Housing:')),
+                  const SizedBox(width: 80, child: Text('Name:')),
                   Expanded(
-                    child: DropdownButton<String>(
-                      value: selectedHousingId,
+                    child: TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter worker name',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Profession dropdown
+              Row(
+                children: [
+                  const SizedBox(width: 80, child: Text('Role:')),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedProfession,
                       isExpanded: true,
-                      hint: const Text('Select housing'),
-                      items: _getAvailableHousing().map((unit) {
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      menuMaxHeight: 300,
+                      items: widget.availableProfessions.map((profession) {
                         return DropdownMenuItem(
-                          value: unit.id,
-                          child: Text(unit.displayName),
+                          value: profession,
+                          child: Text(profession),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            selectedProfession = value;
+                            // Reset master class if profession doesn't support current shift
+                            if (selectedMasterClassId != null) {
+                              final masterClass = widget.masterClasses.firstWhere(
+                                (mc) => mc.id == selectedMasterClassId,
+                                orElse: () => MasterClass(id: '', displayName: '', shiftType: ShiftType.off),
+                              );
+                              final profCapacity = Constants.getProfessionCapacity(value, widget.professionCapacities);
+                              if (masterClass.shiftType == ShiftType.night && 
+                                  profCapacity != null && !profCapacity.availableAtNight) {
+                                selectedMasterClassId = null;
+                                selectedHousingId = null;
+                              }
+                            }
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Master class dropdown
+              Row(
+                children: [
+                  const SizedBox(width: 80, child: Text('Class:')),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedMasterClassId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      hint: const Text('Select master class'),
+                      menuMaxHeight: 300,
+                      items: _getAvailableMasterClasses().map((masterClass) {
+                        return DropdownMenuItem(
+                          value: masterClass.id,
+                          child: Text('${masterClass.displayName} (${masterClass.shiftType.displayName})'),
                         );
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedHousingId = value;
+                          selectedMasterClassId = value;
+                          // Reset housing selection when master class changes
+                          selectedHousingId = null;
                         });
                       },
                     ),
@@ -179,26 +164,59 @@ class _WorkerEditorDialogState extends State<WorkerEditorDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-            ],
-            
-            const Spacer(),
-            
-            // Action buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+              
+              // Housing dropdown (only when master class is selected)
+              if (selectedMasterClassId != null) ...[
+                Row(
+                  children: [
+                    const SizedBox(width: 80, child: Text('Housing:')),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: selectedHousingId,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        hint: const Text('Select housing'),
+                        menuMaxHeight: 300,
+                        items: _getAvailableHousing().map((unit) {
+                          return DropdownMenuItem(
+                            value: unit.id,
+                            child: Text(unit.displayName),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedHousingId = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: _saveWorker,
-                  child: const Text('Save'),
-                ),
+                const SizedBox(height: 16),
               ],
-            ),
-          ],
+              
+              const SizedBox(height: 40),
+              
+              // Action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: _saveWorker,
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
